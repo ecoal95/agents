@@ -54,11 +54,14 @@ public class AlumnBehaviour extends CyclicBehaviour {
     public void action() {
         assert this.alumn.getCurrentAssignedGroup() != null;
         // Send a message to the other alumns iff:
+        // - We don't have any pending messages
         // - We aren't happy with our curent group
         // - We don't have pending replies, neither from the alumns nor from the
         // teacher
         // - We haven't asked more than MAX_UNSUCCESSFUL_REQUEST times
-        if (!this.alumn.isAvailableForCurrentAssignedGroup() && !this.pendingReplies()
+        if (this.alumn.isMessageQueueEmpty()
+                && !this.alumn.isAvailableForCurrentAssignedGroup()
+                && !this.pendingReplies()
                 && this.batchRequestsAlreadyDone < MAX_UNSUCCESFUL_REQUESTS) {
             this.pendingRepliesFromAlumns += this.otherAlumns;
             this.batchRequestsAlreadyDone += 1;

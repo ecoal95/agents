@@ -147,4 +147,8 @@ public class SimpleAgent extends Agent {
     public boolean sendMessageToType(String type, Serializable contents) {
         return this.sendMessage(this.findAgentsByType(type), contents);
     }
+
+    public boolean isMessageQueueEmpty() {
+        return this.getCurQueueSize() == 0;
+    }
 }
