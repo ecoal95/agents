@@ -5,6 +5,7 @@
 
 	<property name="src" location="src" />
 	<property name="build" location="build" />
+	<property name="bin" location="bin" />
 	<property name="lib" location="lib" />
 
 	<path id="classpath">
@@ -61,6 +62,7 @@
 	</target>
 
 	<target name="clean" description="clean up">
+		<delete dir="${bin}" />
 		<delete dir="${build}" />
 		<delete dir="${lib}" />
 		<delete file="APDescription.txt" />
