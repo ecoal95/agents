@@ -90,6 +90,7 @@
 
   <target name="run" depends="compile" description="Run without debug output">
     <java classpathref="classpath" classname="jade.Boot" fork="true" error="run-log.txt">
+      <jvmarg value="-ea" />
       <arg value="-agents" />
       <!-- Our agents will be:
         - 1 teacher
