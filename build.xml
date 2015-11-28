@@ -107,7 +107,9 @@
     <delete dir="${bin}" />
     <delete dir="${build}" />
     <delete dir="${lib}" />
+    <delete file="run-log.txt"/>
     <delete file="APDescription.txt" />
     <delete file="MTPs-Main-Container.txt" />
+    <delete file="workbench.xmi"/>
   </target>
 </project>

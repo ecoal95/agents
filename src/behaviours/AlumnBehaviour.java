@@ -130,7 +130,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
                 ACLMessage next = this.alumn.blockingReceive(MessageTemplate
                         .and(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate
                                 .not(MessageTemplate.MatchSender(this.alumn.getTeacherService()))),
-                                                  1);
+                                                             1);
                 if (next == null)
                     break;
 
