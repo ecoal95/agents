@@ -116,10 +116,11 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
                 this.alumnCount += 1;
 
-                assert alumnCount <= EXPECTED_ALUMN_COUNT;
+                assert this.alumnCount <= TeacherBehaviour.EXPECTED_ALUMN_COUNT;
 
-                if (EXPECTED_ALUMN_COUNT == this.alumnCount)
+                if (TeacherBehaviour.EXPECTED_ALUMN_COUNT == this.alumnCount) {
                     this.teacher.sendMessageToType("alumn", new InitMessage());
+                }
 
                 return;
             case TEACHER_GROUP_CHANGE_REQUEST:

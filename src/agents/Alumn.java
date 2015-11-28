@@ -93,7 +93,7 @@ public abstract class Alumn extends SimpleAgent {
         try {
             final Message initMessage = (Message) initMsg.getContentObject();
             assert initMessage.getType() == MessageType.INIT;
-        } catch (UnreadableException ex) {
+        } catch (final UnreadableException ex) {
             System.err.println("W.T.F");
             ex.printStackTrace(System.err);
         }

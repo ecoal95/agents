@@ -9,7 +9,7 @@ public class GroupChangeRequestConfirmationMessage extends AlumnToAlumnMessage {
 
     public GroupChangeRequestConfirmationMessage(Availability oldGroup, Availability newGroup) {
         super(MessageType.GROUP_CHANGE_REQUEST_CONFIRMATION);
-        assert!oldGroup.equals(newGroup);
+        assert !oldGroup.equals(newGroup);
         this.oldGroup = oldGroup;
         this.newGroup = newGroup;
     }

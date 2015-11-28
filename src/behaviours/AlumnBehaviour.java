@@ -2,15 +2,13 @@ package behaviours;
 
 import java.util.EnumSet;
 
-import agents.Availability;
 import agents.Alumn;
-
+import agents.Availability;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-
 import messages.GroupChangeRequestConfirmationDenegationMessage;
 import messages.GroupChangeRequestConfirmationMessage;
 import messages.GroupChangeRequestDenegationMessage;
@@ -61,8 +59,9 @@ public class AlumnBehaviour extends CyclicBehaviour {
         /// NOTE: Possibly this is no longer needed since we directly use
         /// EXPECTED_ALUMN_COUNT,
         /// but...
-        while (alumn.findAgentsByType("alumn").length != TeacherBehaviour.EXPECTED_ALUMN_COUNT)
+        while (alumn.findAgentsByType("alumn").length != TeacherBehaviour.EXPECTED_ALUMN_COUNT) {
             alumn.blockingReceive(MessageTemplate.not(MessageTemplate.MatchAll()), 100);
+        }
 
         this.otherAlumns = TeacherBehaviour.EXPECTED_ALUMN_COUNT - 1;
 
@@ -87,7 +86,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
         // - We haven't asked more than MAX_UNSUCCESSFUL_REQUEST times
         if (this.alumn.isMessageQueueEmpty() && !this.alumn.isAvailableForCurrentAssignedGroup()
                 && !this.pendingReplies()
-                && this.batchRequestsAlreadyDone < MAX_UNSUCCESFUL_REQUESTS) {
+                && this.batchRequestsAlreadyDone < AlumnBehaviour.MAX_UNSUCCESFUL_REQUESTS) {
             this.pendingRepliesFromAlumns += this.otherAlumns;
             this.batchRequestsAlreadyDone += 1;
 
@@ -127,20 +126,23 @@ public class AlumnBehaviour extends CyclicBehaviour {
             // NOTE: We try to get first the responses, but we can't avoid
             // handling the requests because if not we'll get interlocked
             while (true) {
-                ACLMessage next = this.alumn.blockingReceive(MessageTemplate
+                final ACLMessage next = this.alumn.blockingReceive(MessageTemplate
                         .and(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate
                                 .not(MessageTemplate.MatchSender(this.alumn.getTeacherService()))),
-                                                             1);
-                if (next == null)
+                                                                   1);
+                if (next == null) {
                     break;
+                }
 
                 this.handleIncomingMessage(next);
             }
 
-            if (this.pendingRepliesFromAlumns > 0)
+            if (this.pendingRepliesFromAlumns > 0) {
                 this.handleIncomingMessage(MessageTemplate
                         .not(MessageTemplate.MatchSender(this.alumn.getTeacherService())));
-            // And then everything else, including replies and all that stuff
+                // And then everything else, including replies and all that
+                // stuff
+            }
         } else {
             System.err
                     .println("INFO: [" + this.myAgent.getLocalName() + "] Listening to everything");
@@ -317,9 +319,9 @@ public class AlumnBehaviour extends CyclicBehaviour {
                     // replies, check if the new groups interest us
                     if (!this.alumn.isAvailableForCurrentAssignedGroup()
                             && !this.pendingReplies()) {
-                        boolean isFromGroupInteresting = this.alumn.getAvailability()
+                        final boolean isFromGroupInteresting = this.alumn.getAvailability()
                                 .contains(teacherGroupChangeMessage.fromGroup);
-                        boolean isToGroupInteresting = this.alumn.getAvailability()
+                        final boolean isToGroupInteresting = this.alumn.getAvailability()
                                 .contains(teacherGroupChangeMessage.toGroup);
 
                         // NOTE: we handle this two messages completely
@@ -356,7 +358,7 @@ public class AlumnBehaviour extends CyclicBehaviour {
                         // Then we must ask them to change any group with us,
                         // just in case.
                         if (!this.pendingReplyFromTeacher) {
-                            EnumSet<Availability> anyAvailability = Availability.ALL.clone();
+                            final EnumSet<Availability> anyAvailability = Availability.ALL.clone();
                             anyAvailability.remove(this.alumn.getCurrentAssignedGroup());
 
                             this.alumn.sendMessage(teacherGroupChangeMessage.toAlumn,

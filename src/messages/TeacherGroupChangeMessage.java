@@ -1,7 +1,6 @@
 package messages;
 
 import agents.Availability;
-
 import jade.core.AID;
 
 public final class TeacherGroupChangeMessage extends TeacherToAlumnMessage {

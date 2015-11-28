@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 
 import agents.Availability;
 import agents.Teacher;
-
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-
 import messages.FirstAssignationMessage;
 import messages.InitMessage;
 import messages.Message;
@@ -91,10 +89,10 @@ public class TeacherBehaviour extends CyclicBehaviour {
         System.out.println("Starting");
         System.out.println("========================================\n\n");
 
-        SortedSet<AID> keys = new TreeSet<AID>(groups.keySet());
+        final SortedSet<AID> keys = new TreeSet<AID>(this.groups.keySet());
 
-        for (AID key : keys) {
-            final Availability group = groups.get(key);
+        for (final AID key : keys) {
+            final Availability group = this.groups.get(key);
             System.out.println(" * " + key.getLocalName() + ": " + group);
         }
 
@@ -133,9 +131,9 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
                 this.alumnCount += 1;
 
-                assert alumnCount <= EXPECTED_ALUMN_COUNT;
+                assert this.alumnCount <= TeacherBehaviour.EXPECTED_ALUMN_COUNT;
 
-                if (EXPECTED_ALUMN_COUNT == this.alumnCount) {
+                if (TeacherBehaviour.EXPECTED_ALUMN_COUNT == this.alumnCount) {
                     this.printStartingStatus();
                     this.teacher.sendMessageToType("alumn", new InitMessage());
                 }
@@ -159,7 +157,7 @@ public class TeacherBehaviour extends CyclicBehaviour {
                 // We don't send the message to every alumn, we send it to both
                 // implicated alumns, and they'll take care to forward it to
                 // everyone else
-                Message content = new TeacherGroupChangeMessage(requestMessage.fromAlumn,
+                final Message content = new TeacherGroupChangeMessage(requestMessage.fromAlumn,
                         requestMessage.toAlumn, requestMessage.fromGroup, requestMessage.toGroup);
 
                 this.teacher.replyTo(msg, content);
