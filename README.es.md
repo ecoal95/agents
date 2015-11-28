@@ -3,9 +3,15 @@
  * Asignatura: Progamación avanzada
  * Statement: See [statement.pdf][statement]
 
+## Requerimientos
+
+ * JVM 8+ (version tested: `javac 1.8.0_66-internal`, `OpenJDK Runtime
+     Environment (build 1.8.0_66-internal-b17)`.
+ * [Apache Ant][ant]
+
 ## Compilando
 
-Usamos [Apache Ant](https://ant.apache.org) como nuestra infraestructura para
+Usamos [Apache Ant][ant] como nuestra infraestructura para
 compilar, y también (por simplicidad) para ejecutar la práctica.
 
 Para compilar debería de ser suficiente con escribir el comando `ant`:
@@ -34,3 +40,4 @@ $ ant run-debug
 Que muestra toda la información en pantalla (aviso: grande).
 
 [statement]: statement.pdf
+[ant]: https://ant.apache.org
