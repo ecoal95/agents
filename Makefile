@@ -2,19 +2,19 @@ ECLIPSE ?= eclipse
 
 .PHONY: all
 all:
-	ant
+	@ant
 
 .PHONY: run
 run:
-	ant run
+	@ant run
 
 .PHONY: run-debug
 run-debug:
-	ant run-debug
+	@ant run-debug
 
 .PHONY: clean
 clean:
-	ant clean
+	@ant clean
 
 .PHONY: format
 format:
