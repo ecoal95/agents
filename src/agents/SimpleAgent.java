@@ -101,7 +101,7 @@ public class SimpleAgent extends Agent {
         return this.findAgents(null, name);
     }
 
-    public boolean sendMessage(DFAgentDescription[] receivers, Serializable contents) {
+    public ACLMessage sendMessage(DFAgentDescription[] receivers, Serializable contents) {
         final AID[] agents = new AID[receivers.length];
 
         for (int i = 0; i < receivers.length; ++i) {
@@ -111,16 +111,24 @@ public class SimpleAgent extends Agent {
         return this.sendMessage(agents, contents);
     }
 
-    public boolean sendMessage(AID receiver, Serializable contents) {
+    public ACLMessage sendMessage(AID receiver, Serializable contents) {
         return this.sendMessage(new AID[] { receiver }, contents);
     }
 
-    public boolean sendMessage(AID[] receivers, Serializable contents) {
+    public ACLMessage sendMessage(AID receiver, Serializable contents, int performative) {
+        return this.sendMessage(new AID[] { receiver }, contents, performative);
+    }
+
+    public ACLMessage sendMessage(AID[] receivers, Serializable contents) {
+        return this.sendMessage(receivers, contents, ACLMessage.REQUEST);
+    }
+
+    public ACLMessage sendMessage(AID[] receivers, Serializable contents, int performative) {
         if (receivers == null || contents == null) {
-            return false;
+            return null;
         }
 
-        final ACLMessage aclMessage = new ACLMessage(ACLMessage.REQUEST);
+        final ACLMessage aclMessage = new ACLMessage(performative);
 
         for (final AID agent : receivers) {
             if (agent != null) {
@@ -128,11 +136,32 @@ public class SimpleAgent extends Agent {
             }
         }
 
-        // aclMessage.setOntology(ontology);
-        // aclMessage.setLanguage(new SLCodec().getName());
         aclMessage.setEnvelope(new Envelope());
+        // aclMessage.setLanguage(new SLCodec().getName());
         // aclMessage.getEnvelope().setPayloadEncoding("ISO8859_1");
         // aclMessage.getEnvelope().setAclRepresentation(FIPANames.ACLCodec.XML);
+
+        try {
+            aclMessage.setContentObject(contents);
+        } catch (final IOException e) {
+            return null;
+        }
+
+        this.send(aclMessage);
+        return aclMessage;
+    }
+
+    public ACLMessage sendMessageToType(String type, Serializable contents) {
+        return this.sendMessage(this.findAgentsByType(type), contents);
+    }
+
+    public boolean isMessageQueueEmpty() {
+        return this.getCurQueueSize() == 0;
+    }
+
+    public boolean replyTo(ACLMessage msg, Serializable contents) {
+        final ACLMessage aclMessage = msg.createReply();
+        aclMessage.setPerformative(ACLMessage.INFORM);
 
         try {
             aclMessage.setContentObject(contents);
@@ -142,13 +171,5 @@ public class SimpleAgent extends Agent {
 
         this.send(aclMessage);
         return true;
-    }
-
-    public boolean sendMessageToType(String type, Serializable contents) {
-        return this.sendMessage(this.findAgentsByType(type), contents);
-    }
-
-    public boolean isMessageQueueEmpty() {
-        return this.getCurQueueSize() == 0;
     }
 }

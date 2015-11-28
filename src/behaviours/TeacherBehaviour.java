@@ -5,14 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import agents.Availability;
 import agents.Teacher;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+
 import messages.FirstAssignationMessage;
 import messages.InitMessage;
 import messages.Message;
@@ -25,8 +29,8 @@ import messages.TeacherGroupChangeRequestMessage;
  */
 public class TeacherBehaviour extends CyclicBehaviour {
     private static final long serialVersionUID = 4979147830188132019L;
-    private static long MAX_ALUMNS_PER_GROUP = 5;
-    private static long EXPECTED_ALUMN_COUNT = 9;
+    private static int MAX_ALUMNS_PER_GROUP = 5;
+    public static int EXPECTED_ALUMN_COUNT = 20;
     private static EnumSet<Availability> AVAILABLE_GROUPS = EnumSet
             .of(Availability.MONDAY, Availability.TUESDAY, Availability.THURDSDAY,
                 Availability.FRIDAY);
@@ -82,10 +86,25 @@ public class TeacherBehaviour extends CyclicBehaviour {
         return result;
     }
 
+    private void printStartingStatus() {
+        System.out.println("\n\n\n========================================");
+        System.out.println("Starting");
+        System.out.println("========================================\n\n");
+
+        SortedSet<AID> keys = new TreeSet<AID>(groups.keySet());
+
+        for (AID key : keys) {
+            final Availability group = groups.get(key);
+            System.out.println(" * " + key.getLocalName() + ": " + group);
+        }
+
+        System.out.println("\n\n\n");
+    }
+
     @Override
     public void action() {
         // We have to use a timeout to allow the WakerBehaviour to take place
-        final ACLMessage msg = this.myAgent.blockingReceive(100);
+        final ACLMessage msg = this.teacher.blockingReceive(100);
 
         if (msg == null) {
             return;
@@ -109,16 +128,17 @@ public class TeacherBehaviour extends CyclicBehaviour {
         switch (message.getType()) {
             case FIRST_ASSIGNATION_REQUEST:
                 // TODO: This should maybe be an INFORM message, with reply
-                this.teacher
-                        .sendMessage(sender,
+                this.teacher.replyTo(msg,
                                      new FirstAssignationMessage(this.firstAssignation(sender)));
 
                 this.alumnCount += 1;
 
                 assert alumnCount <= EXPECTED_ALUMN_COUNT;
 
-                if (EXPECTED_ALUMN_COUNT == this.alumnCount)
+                if (EXPECTED_ALUMN_COUNT == this.alumnCount) {
+                    this.printStartingStatus();
                     this.teacher.sendMessageToType("alumn", new InitMessage());
+                }
 
                 return;
             case TEACHER_GROUP_CHANGE_REQUEST:
@@ -130,17 +150,20 @@ public class TeacherBehaviour extends CyclicBehaviour {
                 assert this.groups.get(requestMessage.fromAlumn) == requestMessage.fromGroup
                         && this.groups.get(requestMessage.toAlumn) == requestMessage.toGroup;
 
+                System.out.println("Group change: " + requestMessage.fromAlumn.getLocalName()
+                        + " <-> " + requestMessage.toAlumn.getLocalName());
+
                 this.groups.put(requestMessage.fromAlumn, requestMessage.toGroup);
                 this.groups.put(requestMessage.toAlumn, requestMessage.fromGroup);
 
                 // We don't send the message to every alumn, we send it to both
-                // implicated alumns,
-                // and they'll take care to forward it to everyone else
-                this.teacher
-                        .sendMessage(new AID[] { requestMessage.fromAlumn, requestMessage.toAlumn },
-                                     new TeacherGroupChangeMessage(requestMessage.fromAlumn,
-                                             requestMessage.toAlumn, requestMessage.fromGroup,
-                                             requestMessage.toGroup));
+                // implicated alumns, and they'll take care to forward it to
+                // everyone else
+                Message content = new TeacherGroupChangeMessage(requestMessage.fromAlumn,
+                        requestMessage.toAlumn, requestMessage.fromGroup, requestMessage.toGroup);
+
+                this.teacher.replyTo(msg, content);
+                this.teacher.sendMessage(requestMessage.toAlumn, content, ACLMessage.INFORM);
                 return;
             default:
                 System.err.println("ERROR: Unexpected message of type " + message.getType()

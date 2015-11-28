@@ -1,9 +1,12 @@
 package behaviours;
 
-import java.util.Map;
+import java.util.HashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import agents.Availability;
 import agents.Teacher;
+
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
@@ -37,7 +40,8 @@ public class TeacherWakerBehaviour extends WakerBehaviour {
         this.teacher.sendMessageToType("alumn", new TerminationRequestMessage());
 
         while (pendingReplies-- > 0) {
-            ACLMessage aclMessage = this.teacher.blockingReceive();
+            ACLMessage aclMessage = this.teacher
+                    .blockingReceive(MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             try {
                 Message msg = (Message) aclMessage.getContentObject();
                 assert msg.getType() == MessageType.TERMINATION_CONFIRMATION;
@@ -45,14 +49,16 @@ public class TeacherWakerBehaviour extends WakerBehaviour {
             }
         }
 
-        System.err.println("\n\n\n========================================");
-        System.err.println("Ended");
-        System.err.println("========================================\n\n");
+        System.out.println("\n\n\n========================================");
+        System.out.println("Ended");
+        System.out.println("========================================\n\n");
 
-        for (final Map.Entry<AID, Availability> entry : this.teacher.getGroups().entrySet()) {
-            final AID agent = entry.getKey();
-            final Availability group = entry.getValue();
-            System.err.println(" * " + agent.getLocalName() + ": " + group);
+        HashMap<AID, Availability> map = this.teacher.getGroups();
+        SortedSet<AID> keys = new TreeSet<AID>(map.keySet());
+
+        for (AID key : keys) {
+            final Availability group = map.get(key);
+            System.out.println(" * " + key.getLocalName() + ": " + group);
         }
 
         final Codec codec = new SLCodec();

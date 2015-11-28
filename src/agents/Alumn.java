@@ -39,6 +39,11 @@ public abstract class Alumn extends SimpleAgent {
         return this.getAvailability().contains(this.currentAssignedGroup);
     }
 
+    public ACLMessage blockingReceiveFromTeacher() {
+        assert this.teacherService != null;
+        return this.blockingReceive(MessageTemplate.MatchSender(this.teacherService));
+    }
+
     @Override
     protected void setup() {
         try {
@@ -51,23 +56,25 @@ public abstract class Alumn extends SimpleAgent {
         this.behaviour = new AlumnBehaviour(this);
         this.addBehaviour(this.behaviour);
 
-        System.out.println("Alumn agent " + this.getAID() + " started");
+        System.err.println("Alumn agent " + this.getAID() + " started");
 
         this.currentAssignedGroup = null;
 
-        this.teacherService = this.getService("teacher");
-
-        if (this.teacherService == null) {
-            System.err.println("Teacher agent not found, aborting...");
-            this.doDelete();
-            return;
-        }
+        do {
+            this.teacherService = this.getService("teacher");
+            if (this.teacherService == null) {
+                System.err.println("Teacher agent not found, retrying in a few moments...");
+                /// This is dirty as heck, but we can use a negative
+                /// MessageTemplate to ensure we sleep enough without using the
+                /// Thread API.
+                this.blockingReceive(MessageTemplate.not(MessageTemplate.MatchAll()), 100);
+            }
+        } while (this.teacherService == null);
 
         this.sendMessage(this.teacherService, new FirstAssignationRequestMessage());
-        System.out.println("Requested first assignment to " + this.teacherService);
+        System.err.println("Requested first assignment to " + this.teacherService);
 
-        final ACLMessage msg = this
-                .blockingReceive(MessageTemplate.MatchSender(this.teacherService));
+        final ACLMessage msg = this.blockingReceiveFromTeacher();
 
         try {
             final FirstAssignationMessage response = (FirstAssignationMessage) msg
@@ -78,16 +85,19 @@ public abstract class Alumn extends SimpleAgent {
             ex.printStackTrace(System.err);
         }
 
-        System.out.println("Alumn " + this.getAID() + " created. Assigned: "
+        System.err.println("Alumn " + this.getAID() + " created. Assigned: "
                 + this.currentAssignedGroup);
 
-        final ACLMessage initMsg = this
-                .blockingReceive(MessageTemplate.MatchSender(this.teacherService));
+        final ACLMessage initMsg = this.blockingReceiveFromTeacher();
 
         try {
             final Message initMessage = (Message) initMsg.getContentObject();
             assert initMessage.getType() == MessageType.INIT;
         } catch (UnreadableException ex) {
+            System.err.println("W.T.F");
+            ex.printStackTrace(System.err);
         }
+
+        System.err.println("INFO: " + this.getLocalName() + " got INIT");
     }
 }
