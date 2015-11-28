@@ -6,6 +6,9 @@ all:
 run:
 	ant run
 
+run-debug:
+	ant run-debug
+
 clean:
 	ant clean
 

@@ -1,71 +1,113 @@
 <project name="agents" default="compile" basedir=".">
-	<description>
-		Final exercise for advanced programming (GII USAL 2015)
-	</description>
+  <description>
+    Final exercise for advanced programming (GII USAL 2015)
+  </description>
 
-	<property name="src" location="src" />
-	<property name="build" location="build" />
-	<property name="bin" location="bin" />
-	<property name="lib" location="lib" />
+  <property name="src" location="src" />
+  <property name="build" location="build" />
+  <property name="bin" location="bin" />
+  <property name="lib" location="lib" />
 
-	<path id="classpath">
-		<fileset dir="${lib}">
-			<include name="**/*.jar" />
-		</fileset>
-		<pathelement path="${build}" />
-	</path>
+  <path id="classpath">
+    <fileset dir="${lib}">
+      <include name="**/*.jar" />
+    </fileset>
+    <pathelement path="${build}" />
+  </path>
 
-	<target name="init">
-		<tstamp />
-		<mkdir dir="${build}" />
-	</target>
+  <target name="init">
+    <tstamp />
+    <mkdir dir="${build}" />
+  </target>
 
-	<target name="libs.init">
-		<mkdir dir="${lib}" />
-	</target>
+  <target name="libs.init">
+    <mkdir dir="${lib}" />
+  </target>
 
 
-	<target name="libs.jade.present-check">
-		<available file="lib/jade/jade.jar" property="libs.jade.present" />
-	</target>
+  <target name="libs.jade.present-check">
+    <available file="lib/jade/jade.jar" property="libs.jade.present" />
+  </target>
 
-	<target name="libs.jade" depends="libs.jade.present-check"
-		unless="libs.jade.present">
-		<mkdir dir="${lib}/jade" />
-		<get src="http://jade.tilab.com/dl.php?file=JADE-bin-4.3.3.zip"
-			dest="${lib}/jade/jade.zip" />
-		<unzip src="${lib}/jade/jade.zip" dest="${lib}/jade">
-			<patternset>
-				<include name="jade/lib/jade.jar" />
-			</patternset>
-			<mapper type="flatten" />
-		</unzip>
-		<delete file="${lib}/jade/jade.zip" />
-		<delete dir="${lib}/jade/jade" />
-	</target>
+  <target name="libs.jade" depends="libs.jade.present-check"
+    unless="libs.jade.present">
+    <mkdir dir="${lib}/jade" />
+    <get src="http://jade.tilab.com/dl.php?file=JADE-bin-4.3.3.zip"
+      dest="${lib}/jade/jade.zip" />
+    <unzip src="${lib}/jade/jade.zip" dest="${lib}/jade">
+      <patternset>
+        <include name="jade/lib/jade.jar" />
+      </patternset>
+      <mapper type="flatten" />
+    </unzip>
+    <delete file="${lib}/jade/jade.zip" />
+    <delete dir="${lib}/jade/jade" />
+  </target>
 
-	<target name="libs" depends="libs.init,libs.jade">
-	</target>
+  <target name="libs.codec.present-check">
+    <available file="lib/apache/commons-codec-1.10.jar" property="libs.codec.present" />
+  </target>
 
-	<target name="compile" depends="libs,init" description="Compile the source">
-		<javac srcdir="${src}" destdir="${build}" classpathref="classpath" />
-	</target>
+  <target name="libs.codec" depends="libs.codec.present-check"
+    unless="libs.codec.present">
+    <mkdir dir="${lib}/apache" />
+    <get src="http://apache.rediris.es/commons/codec/binaries/commons-codec-1.10-bin.zip"
+      dest="${lib}/apache/codec.zip" />
+    <unzip src="${lib}/apache/codec.zip" dest="${lib}/apache">
+      <patternset>
+        <include name="commons-codec-1.10/commons-codec-1.10.jar" />
+      </patternset>
+      <mapper type="flatten" />
+    </unzip>
+    <delete file="${lib}/apache/codec.zip" />
+    <delete dir="${lib}/jade/jade" />
+  </target>
 
-	<target name="run" depends="compile" description="Run the teacher agent">
-		<java classpathref="classpath" classname="jade.Boot" fork="true">
-			<jvmarg value="-ea" />
-			<arg value="-gui" />
-			<arg value="-agents" />
-			<arg
-				value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;availableAlumn3:agents.AvailableAlumn;availableAlumn4:agents.AvailableAlumn;availableAlumn5:agents.AvailableAlumn;semiFlexibleAlumn1:agents.SemiFlexibleAlumn;semiFlexibleAlumn2:agents.SemiFlexibleAlumn;mondayAlumn1:agents.MondayAlumn;mondayAlumn2:agents.MondayAlumn" />
-		</java>
-	</target>
 
-	<target name="clean" description="clean up">
-		<delete dir="${bin}" />
-		<delete dir="${build}" />
-		<delete dir="${lib}" />
-		<delete file="APDescription.txt" />
-		<delete file="MTPs-Main-Container.txt" />
-	</target>
+  <target name="libs" depends="libs.init,libs.jade,libs.codec">
+  </target>
+
+  <target name="compile" depends="libs,init" description="Compile the source">
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath" />
+  </target>
+
+  <target name="run-debug" depends="compile" description="Run in debug mode">
+    <java classpathref="classpath" classname="jade.Boot" fork="true">
+      <jvmarg value="-ea" />
+      <arg value="-gui" />
+      <arg value="-agents" />
+      <!-- Our agents will be:
+        - 1 teacher
+        - 10 AvailableAlumn (all)
+        - 3 SemiFlexibleAlumn (monday/friday)
+        - 4 MondayAlumn (monday)
+        - 3 FridayAlumn (friday)
+      -->
+      <arg
+        value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;availableAlumn3:agents.AvailableAlumn;availableAlumn4:agents.AvailableAlumn;availableAlumn5:agents.AvailableAlumn;availableAlumn6:agents.AvailableAlumn;availableAlumn7:agents.AvailableAlumn;availableAlumn8:agents.AvailableAlumn;availableAlumn9:agents.AvailableAlumn;availableAlumn10:agents.AvailableAlumn;semiFlexibleAlumn1:agents.SemiFlexibleAlumn;semiFlexibleAlumn2:agents.SemiFlexibleAlumn;semiFlexibleAlumn3:agents.SemiFlexibleAlumn;mondayAlumn1:agents.MondayAlumn;mondayAlumn2:agents.MondayAlumn;mondayAlumn3:agents.MondayAlumn;mondayAlumn4:agents.MondayAlumn;fridayAlumn1:agents.FridayAlumn;fridayAlumn2:agents.FridayAlumn;fridayAlumn3:agents.FridayAlumn" />
+    </java>
+  </target>
+
+  <target name="run" depends="compile" description="Run without debug output">
+    <java classpathref="classpath" classname="jade.Boot" fork="true" error="run-log.txt">
+      <arg value="-agents" />
+      <!-- Our agents will be:
+        - 1 teacher
+        - 10 AvailableAlumn (all)
+        - 3 SemiFlexibleAlumn (monday/friday)
+        - 4 MondayAlumn (monday)
+        - 3 FridayAlumn (friday)
+      -->
+      <arg
+        value="teacher:agents.Teacher;availableAlumn1:agents.AvailableAlumn;availableAlumn2:agents.AvailableAlumn;availableAlumn3:agents.AvailableAlumn;availableAlumn4:agents.AvailableAlumn;availableAlumn5:agents.AvailableAlumn;availableAlumn6:agents.AvailableAlumn;availableAlumn7:agents.AvailableAlumn;availableAlumn8:agents.AvailableAlumn;availableAlumn9:agents.AvailableAlumn;availableAlumn10:agents.AvailableAlumn;semiFlexibleAlumn1:agents.SemiFlexibleAlumn;semiFlexibleAlumn2:agents.SemiFlexibleAlumn;semiFlexibleAlumn3:agents.SemiFlexibleAlumn;mondayAlumn1:agents.MondayAlumn;mondayAlumn2:agents.MondayAlumn;mondayAlumn3:agents.MondayAlumn;mondayAlumn4:agents.MondayAlumn;fridayAlumn1:agents.FridayAlumn;fridayAlumn2:agents.FridayAlumn;fridayAlumn3:agents.FridayAlumn" />
+    </java>
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${bin}" />
+    <delete dir="${build}" />
+    <delete dir="${lib}" />
+    <delete file="APDescription.txt" />
+    <delete file="MTPs-Main-Container.txt" />
+  </target>
 </project>
