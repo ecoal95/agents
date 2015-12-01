@@ -125,7 +125,6 @@ public class TeacherBehaviour extends CyclicBehaviour {
 
         switch (message.getType()) {
             case FIRST_ASSIGNATION_REQUEST:
-                // TODO: This should maybe be an INFORM message, with reply
                 this.teacher.replyTo(msg,
                                      new FirstAssignationMessage(this.firstAssignation(sender)));
 
