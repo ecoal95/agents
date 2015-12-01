@@ -3,6 +3,7 @@ title: Cámbiame de grupo
 subtitle: Programación Avanzada -- Práctica de agentes 2015
 author:
   - Emilio Cobos Álvarez (70912324) <emiliocobos@usal.es>
+  - Víctor Barrueco Gutiérrez (53518348-Q)
 lang: es-ES
 toc-depth: 4
 babel-lang: spanish
